@@ -10,6 +10,7 @@ Rewitten version of the arduino library to use on the HVA xMega.
 
 Using the I2C library
 @made by	Wim Dolman
+@link 		https://github.com/julian19072001/xMega-Libraries/tree/main
 */
 /**************************************************************************/
 
