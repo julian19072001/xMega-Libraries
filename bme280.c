@@ -3,6 +3,7 @@
 @file     	bme280.c
 @author   	Julian Della Guardia
 @date		14-3-2022
+@link		https://github.com/julian19072001/xMega-Libraries/tree/main
 
 Rewitten version of the arduino library to use on the HVA xMega.
 @orignal	David Zovko
