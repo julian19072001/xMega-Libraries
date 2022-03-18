@@ -4,6 +4,7 @@
 @author     Julian Della Guardia
 @date		14-3-2022
 @link		https://github.com/julian19072001/xMega-Libraries/tree/main
+@version    1.1
 
 Rewritten version of the arduino library to use on the HVA xMega
 Calculating parameters are directly taken from the original library.
@@ -32,12 +33,15 @@ Calculating parameters are directly taken from the original library.
 #define ATMOCO2 414.47  //Global CO2 Aug 2021
 
 #define RLOAD 10      //The load resistance on the board in kOhm
-#define RZERO 25.4   //Calibration resistance at atmospheric CO2 level
+#define RZERO 27.1    //Calibration resistance at atmospheric CO2 level
 
 float _rload;   //The load resistance on the board in kOhm
 float _rzero;   //Calibration resistance at atmospheric CO2 level
 
-void init_MQ135(uint16_t pin);
+int32_t adc;
+int32_t MUXPOS;
+
+void init_MQ135(int32_t port, int16_t pin);
 float getCorrectionFactor(float t, float h);
 float getResistance();
 float getCorrectedResistance(float t, float h);
