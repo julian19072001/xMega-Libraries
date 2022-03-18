@@ -2,7 +2,7 @@
 /*!
 @file       mq135.h
 @author     Julian Della Guardia
-@date		14-3-2022
+@date		18-3-2022
 @link		https://github.com/julian19072001/xMega-Libraries/tree/main
 @version    1.1
 
