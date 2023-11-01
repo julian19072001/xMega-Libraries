@@ -499,7 +499,7 @@ void PCA9685_ServoEval(PCA9685_t device_Info, uint16_t minPWMAmount, uint16_t mi
     maxPWMAmount = constrain(maxPWMAmount, midPWMAmount, PCA9685_PWM_FULL);
 
     if (maxPWMAmount - midPWMAmount != midPWMAmount - minPWMAmount) {
-        memset(device_Info._coeff, 0, sizeof(device_Info._coeff));
+        memset(device_Info._coeff, 0, sizeof(&device_Info._coeff));
         device_Info._isCSpline = true;
 
         // Cubic spline code adapted from: https://shiftedbits.org/2011/01/30/cubic-spline-interpolation/
@@ -536,7 +536,7 @@ void PCA9685_ServoEval(PCA9685_t device_Info, uint16_t minPWMAmount, uint16_t mi
         }
     }
     else {
-        memset(device_Info._coeff, 0, sizeof(device_Info._coeff));
+        memset(device_Info._coeff, 0, sizeof(&device_Info._coeff));
         device_Info._isCSpline = false;
 
         device_Info._coeff[0] = minPWMAmount;
