@@ -15,6 +15,9 @@
 #define I2C_STATUS_BUSY    1
 #define I2C_STATUS_NO_ACK  2
 
+#define TWI_BAUD(F_SYS, F_TWI) ((F_SYS/(2*F_TWI))-5)
+#define BAUD_400K 400000UL
+
 void    i2c_init(TWI_t *twi, uint8_t baudRateRegisterSetting);
 uint8_t i2c_start(TWI_t *twi, uint8_t address, uint8_t rw);
 uint8_t i2c_restart(TWI_t *twi, uint8_t address, uint8_t rw);
