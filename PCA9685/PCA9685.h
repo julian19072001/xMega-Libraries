@@ -19,14 +19,19 @@
 */
 
 #ifndef F_CPU
+#ifdef __AVR_ATxmega256A3U__
 #define F_CPU 32000000UL
+#endif
+#ifdef __AVR_ATtiny414__
+#define F_CPU 2000000UL
+#endif
 #endif
 
 #ifndef PCA9685_H
 #define PCA9685_H
 
 // Uncomment or -D this define to swap PWM low(begin)/high(end) phase values in register reads/writes (needed for some chip manufacturers).
-#define PCA9685_SWAP_PWM_BEG_END_REGS
+//#define PCA9685_SWAP_PWM_BEG_END_REGS
 
 
 #include "i2c.h"

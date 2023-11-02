@@ -1,4 +1,4 @@
-/*  Arduino Library for the PCA9685 16-Channel PWM Driver Module.
+/*  ATTiny/xMega Library for the PCA9685 16-Channel PWM Driver Module.
     Copyright (C) 2016-2020 NachtRaveVL     <nachtravevl@gmail.com>
     Copyright (C) 2012 Kasper Skårhøj       <kasperskaarhoj@gmail.com>
     PCA9685 Main
@@ -410,14 +410,14 @@ void writeChannelPWM(PCA9685_t device_Info, uint16_t phaseBegin, uint16_t phaseE
 
 #ifndef PCA9685_SWAP_PWM_BEG_END_REGS
     i2cWire_write(device_Info, (uint8_t)phaseBegin);
-    i2cWire_write(device_Info, (uint8_t)((uint16_t)phaseBegin >> 8));
+    i2cWire_write(device_Info, phaseBegin >> 8);
     i2cWire_write(device_Info, (uint8_t)phaseEnd);
-    i2cWire_write(device_Info, (uint8_t)((uint16_t)phaseEnd >> 8));
+    i2cWire_write(device_Info, phaseEnd >> 8);
 #else
     i2cWire_write(device_Info, (uint8_t)phaseEnd);
-    i2cWire_write(device_Info, (uint8_t)((uint16_t)phaseEnd >> 8));
+    i2cWire_write(device_Info, phaseEnd >> 8);
     i2cWire_write(device_Info, (uint8_t)phaseBegin);
-    i2cWire_write(device_Info, (uint8_t)((uint16_t)phaseBegin >> 8));
+    i2cWire_write(device_Info, phaseBegin >> 8);
 #endif
 }
 
@@ -446,6 +446,7 @@ uint8_t readRegister(PCA9685_t device_Info, uint8_t regAddress) {
         while (bytesRead-- > 0)
             i2cWire_read(device_Info);
         device_Info._lastI2CError = 4;
+        i2cWire_endTransmission(device_Info);
         return 0;
     }
 
