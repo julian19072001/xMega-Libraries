@@ -1,10 +1,14 @@
 /**************************************************************************/
 /*!
 @file     	i2c.c
-@author   	Wim Dolman
+@author   	Julian Della
 */
 /**************************************************************************/
 #include "i2c.h"
+
+#include <util/delay.h> 
+
+uint64_t time;
 
 #ifdef __AVR_ATxmega256A3U__
 void i2c_init(TWI_t *twi, uint8_t baudRateRegisterSetting)
@@ -24,8 +28,11 @@ uint8_t i2c_start(TWI_t *twi, uint8_t address, uint8_t rw)
   if ( (twi->MASTER.STATUS & TWI_MASTER_BUSSTATE_gm) !=                      // if bus available
                        TWI_MASTER_BUSSTATE_IDLE_gc ) return I2C_STATUS_BUSY; //
   twi->MASTER.ADDR = (address << 1) | rw;                                    // send slave address
-  while( ! (twi->MASTER.STATUS & (TWI_MASTER_WIF_bm << rw)) );               // wait until sent
-
+  while( ! (twi->MASTER.STATUS & (TWI_MASTER_WIF_bm << rw)) ){               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
   if ( twi->MASTER.STATUS & TWI_MASTER_RXACK_bm ) {                          // if no ack
     twi->MASTER.CTRLC = TWI_MASTER_CMD_STOP_gc;
     return I2C_STATUS_NO_ACK;
@@ -37,7 +44,11 @@ uint8_t i2c_start(TWI_t *twi, uint8_t address, uint8_t rw)
 uint8_t i2c_restart(TWI_t *twi, uint8_t address, uint8_t rw)
 {
   twi->MASTER.ADDR = (address << 1) | rw;                                    // send slave address
-  while( ! (twi->MASTER.STATUS & (TWI_MASTER_WIF_bm << rw)) );               // wait until sent
+  while( ! (twi->MASTER.STATUS & (TWI_MASTER_WIF_bm << rw)) ){               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
 
   if ( twi->MASTER.STATUS & TWI_MASTER_RXACK_bm ) {                          // if no ack
     twi->MASTER.CTRLC = TWI_MASTER_CMD_STOP_gc;
@@ -56,7 +67,11 @@ void i2c_stop(TWI_t *twi)
 uint8_t i2c_write(TWI_t *twi, uint8_t data)
 {
   twi->MASTER.DATA = data;                                                   // send data
-  while( ! (twi->MASTER.STATUS & TWI_MASTER_WIF_bm) );                       // wait until sent
+  while( ! (twi->MASTER.STATUS & TWI_MASTER_WIF_bm) ){               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
 
   if ( twi->MASTER.STATUS & TWI_MASTER_RXACK_bm ) {                          // if no ack
     twi->MASTER.CTRLC = TWI_MASTER_CMD_STOP_gc;
@@ -70,7 +85,12 @@ uint8_t i2c_read(TWI_t *twi, uint8_t ack)
 {
   uint8_t data;
 
-  while( ! (twi->MASTER.STATUS & TWI_MASTER_RIF_bm) );                       // wait until received
+  while( ! (twi->MASTER.STATUS & TWI_MASTER_WIF_bm) ){               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return 0;
+    _delay_us(1);
+  }
+
   data = twi->MASTER.DATA;                                                   // read data
   twi->MASTER.CTRLC = ((ack==I2C_ACK) ? TWI_MASTER_CMD_RECVTRANS_gc :        // send ack (go on) or
                                TWI_MASTER_ACKACT_bm|TWI_MASTER_CMD_STOP_gc); //     nack (and stop)
@@ -87,9 +107,9 @@ uint8_t i2c_read(TWI_t *twi, uint8_t ack)
 #ifdef __AVR_ATtiny414__
 void i2c_init(TWI_t *twi, uint8_t baudRateRegisterSetting)
 {
-  PORTB.DIRSET	= PIN1_bm|PIN0_bm;              //set pin B0 and B1 as outputs
-	PORTB.PIN0CTRL	= PORT_PULLUPEN_bp;             //enable pullup for B0
-	PORTB.PIN1CTRL	= PORT_PULLUPEN_bp;             //enable pullup for B1
+  PORTB.DIRSET	= PIN1_bm|PIN0_bm;                                      //set pin B0 and B1 as outputs
+	PORTB.PIN0CTRL	= PORT_PULLUPEN_bp;                                   //enable pullup for B0
+	PORTB.PIN1CTRL	= PORT_PULLUPEN_bp;                                   //enable pullup for B1
 
   twi->MBAUD   = baudRateRegisterSetting;
   twi->MCTRLA  = TWI_ENABLE_bm;
@@ -98,12 +118,16 @@ void i2c_init(TWI_t *twi, uint8_t baudRateRegisterSetting)
 
 uint8_t i2c_start(TWI_t *twi, uint8_t address, uint8_t rw)
 {
-  if ( (twi->MSTATUS & TWI_BUSSTATE_gm) !=                      // if bus available
-                       TWI_BUSSTATE_IDLE_gc ) return I2C_STATUS_BUSY; //
-  twi->MADDR = (address << 1) | rw;                                    // send slave address
-  while( ! (twi->MSTATUS & (TWI_WIF_bm << rw)) );               // wait until sent
+  if ( (twi->MSTATUS & TWI_BUSSTATE_gm) !=                              // if bus available
+                       TWI_BUSSTATE_IDLE_gc ) return I2C_STATUS_BUSY;   //
+  twi->MADDR = (address << 1) | rw;                                     // send slave address
+  while( ! (twi->MSTATUS & (TWI_WIF_bm << rw)) ){                       // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
 
-  if ( twi->MSTATUS & TWI_RXACK_bm ) {                          // if no ack
+  if ( twi->MSTATUS & TWI_RXACK_bm ) {                                  // if no ack
     return I2C_STATUS_NO_ACK;
   }
 
@@ -112,10 +136,14 @@ uint8_t i2c_start(TWI_t *twi, uint8_t address, uint8_t rw)
 
 uint8_t i2c_restart(TWI_t *twi, uint8_t address, uint8_t rw)
 {
-  twi->MADDR = (address << 1) | rw;                                    // send slave address
-  while( ! (twi->MSTATUS & (TWI_WIF_bm << rw)) );               // wait until sent
+  twi->MADDR = (address << 1) | rw;                                     // send slave address
+  while( ! (twi->MSTATUS & (TWI_WIF_bm << rw)) ){                       // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
 
-  if ( twi->MSTATUS & TWI_RXACK_bm ) {                          // if no ack
+  if ( twi->MSTATUS & TWI_RXACK_bm ) {                                  // if no ack
     return I2C_STATUS_NO_ACK;
   }
 
@@ -130,10 +158,14 @@ void i2c_stop(TWI_t *twi)
 
 uint8_t i2c_write(TWI_t *twi, uint8_t data)
 {
-  twi->MDATA = data;                                                   // send data
-  while( ! (twi->MSTATUS & TWI_WIF_bm) );                       // wait until sent
+  twi->MDATA = data;                                                    // send data
+  while( ! (twi->MSTATUS & TWI_WIF_bm) ){                               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return I2C_STATUS_NO_RESP;
+    _delay_us(1);
+  }
 
-  if ( twi->MSTATUS & TWI_RXACK_bm ) {                          // if no ack
+  if ( twi->MSTATUS & TWI_RXACK_bm ) {                                  // if no ack
     return I2C_STATUS_NO_ACK;
   }
 
@@ -144,8 +176,13 @@ uint8_t i2c_read(TWI_t *twi, uint8_t ack)
 {
   uint8_t data;
 
-  while( ! (twi->MSTATUS & TWI_RIF_bm) );                       // wait until received
-  data = twi->MDATA;                                                   // read data
+  while( ! (twi->MSTATUS & TWI_RIF_bm) ){                               // wait until sent
+    time++;
+    if(time >= TIMEOUT_TIME) return 0;
+    _delay_us(1);
+  }
+
+  data = twi->MDATA;                                                    // read data
 
   if ( ack == I2C_NACK ) {
     while( ! (twi->MSTATUS & TWI_BUSSTATE_IDLE_gc) );

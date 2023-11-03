@@ -1,2 +1,2 @@
 # xMega-Libraries
-Rewitten arduino libraries for use on the HvA xMega board
+Rewitten arduino libraries for use on the xMega board
