@@ -8,9 +8,6 @@
 Rewitten version of the arduino library to use on the HVA xMega.
 @orignal	David Zovko
 @link		https://github.com/e-radionicacom/BME280-Arduino-Library
-
-Using the I2C library
-@made by	Wim Dolman
 */
 /**************************************************************************/
 

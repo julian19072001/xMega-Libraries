@@ -2,6 +2,9 @@
 /*!
 @file     	i2c.h
 @author   	Julian Della Guardia
+
+Rewitten version of the i2c library to use on the HVA xMega.
+@orignal	Wim Dolman
 */
 /**************************************************************************/
 #include <avr/io.h>
